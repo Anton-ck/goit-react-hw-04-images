@@ -1,44 +1,39 @@
 import PropTypes from 'prop-types';
 import { Overlay, ModalArea, ModalImg, CloseButton } from './Modal.styled';
-import { PureComponent } from 'react';
+import { useEffect } from 'react';
 import { VscChromeClose } from 'react-icons/vsc';
 
-class Modal extends PureComponent {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
+const Modal = ({ imageURL, onClose }) => {
+  useEffect(() => {
+    const handleKeyDown = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
-
-  handleKeyDown = e => {
-    if (e.code === 'Escape') {
-      this.props.onClose();
-    }
-  };
-
-  handleBackDropClick = e => {
+  const handleBackDropClick = e => {
     if (e.currentTarget === e.target) {
-      this.props.onClose();
+      onClose();
     }
   };
-  render() {
-    const { imageURL, onClose } = this.props;
 
-    return (
-      <Overlay onClick={this.handleBackDropClick}>
-        <ModalArea>
-          <CloseButton type="submit" onClick={onClose}>
-            <VscChromeClose size="34px" fill="#fff" />
-          </CloseButton>
+  return (
+    <Overlay onClick={handleBackDropClick}>
+      <ModalArea>
+        <CloseButton type="submit" onClick={onClose}>
+          <VscChromeClose size="34px" fill="#fff" />
+        </CloseButton>
 
-          <ModalImg src={imageURL} alt="Something img" width="100%" />
-        </ModalArea>
-      </Overlay>
-    );
-  }
-}
+        <ModalImg src={imageURL} alt="Something img" width="100%" />
+      </ModalArea>
+    </Overlay>
+  );
+};
 
 export default Modal;
 

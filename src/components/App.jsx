@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-expressions */
 import { fetchImages } from './API/Api';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AppWrapper } from './App.styled';
@@ -10,68 +11,79 @@ import { SearchMessage } from './TextMessages/TextMessages';
 import Loader from './Loader/Loader';
 import Cat from './Cat/Cat';
 
-export class App extends Component {
-  state = {
-    images: [],
-    page: 0,
-    searchQuery: '',
-    isLoading: false,
-    totalResults: 0,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { searchQuery, page } = this.state;
-    if (prevState.page !== page || prevState.searchQuery !== searchQuery) {
+  // useEffect(() => {
+  //   async () => {
+  //     if (!searchQuery) {
+  //       return;
+  //     }
+  //     try {
+  //       setIsLoading(true);
+  //       const collectionImg = await fetchImages(searchQuery, page);
+  //       setImages(prevImages => [...prevImages.images, ...collectionImg.hits]);
+  //       setTotalResults(collectionImg.total);
+  //     } catch (error) {
+  //       console.log(error.message);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  // }, [page, searchQuery]);
+
+  useEffect(() => {
+    (async () => {
+      if (!searchQuery) {
+        return;
+      }
       try {
-        this.setState({ isLoading: true });
+        setIsLoading(true);
 
         const collectionImg = await fetchImages(searchQuery, page);
-        console.log(collectionImg);
-        this.setState(prevState => ({
-          images: [...prevState.images, ...collectionImg.hits],
-          totalResults: collectionImg.total,
-        }));
+
+        setImages(prevImages => [...prevImages, ...collectionImg.hits]);
+        setTotalResults(collectionImg.total);
       } catch (error) {
         console.log(error.message);
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    })();
+  }, [page, searchQuery]);
 
-
-
-  handleFormSubmit = searchQuery => {
-    console.log(searchQuery);
-    if (searchQuery === this.state.searchQuery) {
+  const handleFormSubmit = currentQuerySearch => {
+    console.log(currentQuerySearch);
+    if (currentQuerySearch === searchQuery) {
       return;
     }
-
-    this.setState({ searchQuery, page: 1, images: [], totalResults: 0 });
+    setSearchQuery(currentQuerySearch);
+    setPage(1);
+    setImages([]);
+    setTotalResults(0);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  render() {
-    const { images, isLoading, page, totalResults } = this.state;
-    return (
-      <AppWrapper>
-        <Searchbar onSubmit={this.handleFormSubmit}></Searchbar>
-        <Gallery images={images}></Gallery>
-        {!images.length && !isLoading && !page && (
-          <SearchMessage text="Please type anything, for search anything" />
-        )}
-        {isLoading && <Loader />}
-        {!images.length && page === 1 && !isLoading && <Cat />}
-        {images.length > 0 && totalResults > images.length && (
-          <LoadMoreButton onClick={this.handleLoadMore} />
-        )}
-        <ToastContainer></ToastContainer>
-      </AppWrapper>
-    );
-  }
-}
+  return (
+    <AppWrapper>
+      <Searchbar onSubmit={handleFormSubmit}></Searchbar>
+      <Gallery images={images}></Gallery>
+      {!images.length && !isLoading && !page && (
+        <SearchMessage text="Please type anything, for search anything" />
+      )}
+      {isLoading && <Loader />}
+      {!images.length && page === 1 && !isLoading && <Cat />}
+      {images.length > 0 && totalResults > images.length && (
+        <LoadMoreButton onClick={handleLoadMore} />
+      )}
+      <ToastContainer></ToastContainer>
+    </AppWrapper>
+  );
+};
