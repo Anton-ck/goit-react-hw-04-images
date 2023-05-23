@@ -18,24 +18,6 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
 
-  // useEffect(() => {
-  //   async () => {
-  //     if (!searchQuery) {
-  //       return;
-  //     }
-  //     try {
-  //       setIsLoading(true);
-  //       const collectionImg = await fetchImages(searchQuery, page);
-  //       setImages(prevImages => [...prevImages.images, ...collectionImg.hits]);
-  //       setTotalResults(collectionImg.total);
-  //     } catch (error) {
-  //       console.log(error.message);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  // }, [page, searchQuery]);
-
   useEffect(() => {
     (async () => {
       if (!searchQuery) {
